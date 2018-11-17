@@ -53,10 +53,10 @@ def get_members():
 
     while driver.current_url != "https://join.uqcs.org.au/admin/list":
         username = driver.find_element_by_name('username')
-        username.send_keys('committee2019')
+        username.send_keys(os.environ['UQCS_USER'])
 
         password = driver.find_element_by_name('password')
-        password.send_keys('uqcscommittee2019')
+        password.send_keys(os.environ['UQCS_PASS'])
 
         submit_button = driver.find_element_by_name('submit')
         submit_button.click()
