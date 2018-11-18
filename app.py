@@ -25,8 +25,9 @@ def get_events():
     store = file.Storage('token.json')
     creds = store.get()
     if not creds or creds.invalid:
+        flags = tools.argparser.parse_args(['--noauth_local_webserver'])
         flow = client.flow_from_clientsecrets(os.environ['GOOGLE_APPLICATION_CREDENTIALS'], SCOPES)
-        creds = tools.run_flow(flow, store)
+        creds = tools.run_flow(flow, store, flags)
     service = build('calendar', 'v3', http=creds.authorize(Http()))
 
     # Call the Calendar API
