@@ -5,7 +5,7 @@ from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options
 
 app = Flask(__name__)
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
@@ -48,7 +48,8 @@ def get_members():
     admin_list_url = "https://join.uqcs.org.au/admin/list"
     options = Options()
     options.add_argument("--headless")
-    driver = webdriver.Firefox(firefox_options=options)
+    options.add_argument('--no-sandbox')  # required when running as root user. otherwise you would get no sandbox
+    driver = webdriver.Chrome(chrome_options=options)
     driver.implicitly_wait(30)
     driver.get(admin_list_url)
 
