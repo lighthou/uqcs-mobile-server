@@ -11,14 +11,26 @@ from functools import wraps
 
 app = Flask(__name__)
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
-valid_credentials = {}
 
 
 def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
-    return username in valid_credentials and valid_credentials[username] == password
+    for line in open(os.getcwd() + "/accountfile.txt", "r").readlines():  # Read the lines
+        login_info = line.split()  # Split on the space, and store the results in a list of two strings
+        if username == login_info[0] and password == login_info[1]:
+            return True
+    return False
+
+
+def register(username, password):
+    with open('/home/ryan/Projects/personal/uqcs-mobile-server/accountfile.txt', "a") as creds_file:
+        creds_file.write(username)
+        creds_file.write(" ")
+        creds_file.write(password)
+        creds_file.write("\n")
+        creds_file.close()
 
 
 def authenticate():
@@ -57,7 +69,7 @@ def validate_auth():
 
     for user in response.json():
         if str(user['login']) == username:
-            valid_credentials[username] = password
+            register(username, password)
             return Response('', 200)
 
     return Response('', 401)
