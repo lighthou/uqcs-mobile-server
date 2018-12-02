@@ -25,7 +25,7 @@ def check_auth(username, password):
 
 
 def register(username, password):
-    with open('/home/ryan/Projects/personal/uqcs-mobile-server/accountfile.txt', "a") as creds_file:
+    with open(os.getcwd() + '/accountfile.txt', "a") as creds_file:
         creds_file.write(username)
         creds_file.write(" ")
         creds_file.write(password)
