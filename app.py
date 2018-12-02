@@ -53,10 +53,10 @@ def hello_world():
     return 'Hello World!'
 
 
-@app.route('/sign_in', methods=['POST'])
+@app.route('/sign_in', methods=['GET'])
 @requires_auth
 def sign_in():
-    return Response('', 200)
+    return jsonify("valid sign in")
 
 
 @app.route('/events', methods=['GET'])
