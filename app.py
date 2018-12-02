@@ -56,7 +56,7 @@ def hello_world():
 @app.route('/sign_in', methods=['GET'])
 @requires_auth
 def sign_in():
-    return jsonify("valid sign in")
+    return jsonify([])
 
 
 @app.route('/events', methods=['GET'])
