@@ -53,6 +53,12 @@ def hello_world():
     return 'Hello World!'
 
 
+@app.route('/sign_in')
+@requires_auth
+def sign_in():
+    return Response('', 200)
+
+
 @app.route('/events', methods=['GET'])
 @requires_auth
 def get_events():
