@@ -7,9 +7,37 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import requests
 from requests.auth import HTTPBasicAuth
+from functools import wraps
 
 app = Flask(__name__)
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
+valid_credentials = {}
+
+
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    return username in valid_credentials and valid_credentials[username] == password
+
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+        'Could not verify your access level for that URL.\n'
+        'You have to login with proper credentials', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+
+    return decorated
 
 
 @app.route('/')
@@ -29,13 +57,14 @@ def validate_auth():
 
     for user in response.json():
         if str(user['login']) == username:
+            valid_credentials[username] = password
             return Response('', 200)
 
     return Response('', 401)
 
 
-
 @app.route('/events', methods=['GET'])
+@requires_auth
 def get_events():
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
@@ -64,6 +93,7 @@ def get_events():
 
 
 @app.route('/members', methods=['GET'])
+@requires_auth
 def get_members():
     admin_list_url = "https://join.uqcs.org.au/admin/list"
     options = Options()
