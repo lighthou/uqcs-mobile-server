@@ -53,7 +53,7 @@ def hello_world():
     return 'Hello World!'
 
 
-@app.route('/sign_in')
+@app.route('/sign_in', methods=['POST'])
 @requires_auth
 def sign_in():
     return Response('', 200)
