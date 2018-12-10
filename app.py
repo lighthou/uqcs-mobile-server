@@ -8,6 +8,7 @@ from selenium.webdriver.chrome.options import Options
 import requests
 from requests.auth import HTTPBasicAuth
 from functools import wraps
+import git
 
 app = Flask(__name__)
 SCOPES = 'https://www.googleapis.com/auth/calendar.readonly'
@@ -124,6 +125,16 @@ def get_members():
                         'paid': False if cells[3].text == 'None' else True})
 
     return jsonify(members[1:])  # cut off the titles of the table
+
+
+@app.route('/docs', methods=['GET'])
+def get_docs():
+    # update the repo
+    repo = git.Repo('../committee')
+    repo.remotes.origin.pull()
+    
+    return "HeLlO tHeRe"
+
 
 
 if __name__ == '__main__':
