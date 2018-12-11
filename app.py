@@ -132,9 +132,33 @@ def get_docs():
     # update the repo
     repo = git.Repo('../committee')
     repo.remotes.origin.pull()
-    
-    return "HeLlO tHeRe"
 
+    directory_dict = {}
+    read_files("../committee", directory_dict)
+    return jsonify(directory_dict)
+
+
+def get_immediate_subdirectories(a_dir):
+    return [name for name in os.listdir(a_dir)]
+
+
+def read_files(path, json):
+    directory_name = path.split('/')[-1]
+    if directory_name not in json or json[directory_name] is None:
+        json[directory_name] = {}
+
+    for filename in get_immediate_subdirectories(path):
+        if os.path.isfile(path + '/' + filename) and filename[-3:] == '.md':
+            with open(path + "/" + filename, 'r') as my_file:
+                data = my_file.read()
+                json[directory_name][filename] = data
+                continue
+
+        if os.path.isdir(path + '/' + filename):
+            if filename == ".git":
+                continue
+            json[directory_name][filename] = {}
+            read_files(path + '/' + filename, json[directory_name])
 
 
 if __name__ == '__main__':
