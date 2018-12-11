@@ -128,6 +128,7 @@ def get_members():
 
 
 @app.route('/docs', methods=['GET'])
+@requires_auth
 def get_docs():
     # update the repo
     repo = git.Repo('../committee')
