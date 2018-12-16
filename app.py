@@ -59,12 +59,14 @@ def hello_world():
 @app.route('/sign_in', methods=['GET'])
 @requires_auth
 def sign_in():
+    reset_creds()
     return jsonify([])
 
 
 @app.route('/events', methods=['GET'])
 @requires_auth
 def get_events():
+    reset_creds()
     """Shows basic usage of the Google Calendar API.
     Prints the start and name of the next 10 events on the user's calendar.
     """
@@ -88,12 +90,14 @@ def get_events():
     return_keys = ['start', 'summary', 'description', 'location']
     for event in events:
         return_events.append({key: event[key] for key in return_keys if key in event})
+
     return jsonify(return_events)
 
 
 @app.route('/members', methods=['GET'])
 @requires_auth
 def get_members():
+    reset_creds()
     admin_list_url = "https://join.uqcs.org.au/admin/list"
     options = Options()
     options.add_argument("--headless")
@@ -125,7 +129,6 @@ def get_members():
                         'last_name': cells[1].text,
                         'email': cells[2].text,
                         'paid': False if cells[3].text == 'None' else True})
-
     return jsonify(members[1:])  # cut off the titles of the table
 
 
@@ -148,17 +151,26 @@ def get_docs():
                         f.write(str(data['file_data']))
                         f.close()
                         repo.git.add(os.path.abspath(path))
-                        repo.index.commit(data['commit_message'])
+
+                        user_data = requests.get('https://api.github.com/users/' + os.environ['GIT_USERNAME'],
+                                                 auth=HTTPBasicAuth(os.environ['GIT_USERNAME'],
+                                                                    os.environ['GIT_PASSWORD']))
+
+                        author = git.Actor(os.environ['GIT_USERNAME'], user_data.json()['email'])
+                        repo.index.commit(data['commit_message'], author=author)
                         repo.remotes.origin.push()
+                        reset_creds()
                         return Response()
 
         else:
+            reset_creds()
             return Response(400)
 
     else:
         # else request is get
         directory_dict = {}
         read_files("../committee", directory_dict)
+        reset_creds()
         return jsonify(directory_dict)
 
 
@@ -183,6 +195,11 @@ def read_files(path, json):
                 continue
             json[directory_name][filename] = {}
             read_files(path + '/' + filename, json[directory_name])
+
+
+def reset_creds():
+    os.environ['GIT_USERNAME'] = ''
+    os.environ['GIT_PASSWORD'] = ''
 
 
 if __name__ == '__main__':
