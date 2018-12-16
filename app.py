@@ -157,7 +157,7 @@ def get_docs():
                                                                     os.environ['GIT_PASSWORD']))
 
                         author = git.Actor(os.environ['GIT_USERNAME'], user_data.json()['email'])
-                        repo.index.commit(data['commit_message'], author=author)
+                        repo.index.commit(data['commit_message'], author=author, committer=author)
                         repo.remotes.origin.push()
                         reset_creds()
                         return Response()
