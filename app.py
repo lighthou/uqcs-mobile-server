@@ -25,6 +25,8 @@ def check_auth(username, password):
 
     for user in response.json():
         if str(user['login']) == username:
+            os.environ["GIT_USERNAME"] = username
+            os.environ["GIT_PASSWORD"] = password
             return True
 
     return False
@@ -127,16 +129,37 @@ def get_members():
     return jsonify(members[1:])  # cut off the titles of the table
 
 
-@app.route('/docs', methods=['GET'])
+@app.route('/docs', methods=['GET', 'POST'])
 @requires_auth
 def get_docs():
     # update the repo
     repo = git.Repo('../committee')
     repo.remotes.origin.pull()
 
-    directory_dict = {}
-    read_files("../committee", directory_dict)
-    return jsonify(directory_dict)
+    if request.method == 'POST':
+        data = request.get_json(force=True)
+        if 'file_name' in data and 'file_data' in data and 'commit_message' in data:
+            for root, dirs, files in os.walk('../committee'):
+                for file in files:
+                    if str(file) == data['file_name']:
+                        path = os.path.join(root, file)
+                        open(path, "w").close()
+                        f = open(path, "w")
+                        f.write(str(data['file_data']))
+                        f.close()
+                        repo.git.add(os.path.abspath(path))
+                        repo.index.commit(data['commit_message'])
+                        repo.remotes.origin.push()
+                        return Response()
+
+        else:
+            return Response(400)
+
+    else:
+        # else request is get
+        directory_dict = {}
+        read_files("../committee", directory_dict)
+        return jsonify(directory_dict)
 
 
 def get_immediate_subdirectories(a_dir):
