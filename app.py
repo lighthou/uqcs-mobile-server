@@ -86,8 +86,9 @@ def get_events():
                                           singleEvents=True,
                                           orderBy='startTime').execute()
     events = events_result.get('items', [])
+    print(events_result)
     return_events = []
-    return_keys = ['start', 'summary', 'description', 'location']
+    return_keys = ['start', 'summary', 'description', 'location', 'id']
     for event in events:
         return_events.append({key: event[key] for key in return_keys if key in event})
 
